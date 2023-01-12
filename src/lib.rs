@@ -1,6 +1,6 @@
 #![feature(vec_into_raw_parts)]
 use std::os::raw::c_char;
-use std::ffi::CString;
+use std::ffi::{CStr, CString};
 
 use controlpads;
 
@@ -16,7 +16,8 @@ type CError = u64;
 
 // TODO: more errors
 pub const SUCCESS: CError = 0;
-pub const FAILURE: CError = 1;
+pub const ERROR_CONTROLPADS: CError = 1;
+pub const ERROR_CSTR_TO_STR: CError = 2;
 
 
 fn rust_to_c_strvec(vec: Vec<String>) -> c_string_vec {
@@ -57,8 +58,8 @@ pub extern "C" fn clients_changed(did_change: &mut bool) -> CError {
             *did_change = x;
             SUCCESS
         }
-        Err(_) => { // TODO: use error
-            FAILURE
+        Err(_) => { // TODO: use error (print it to stderr perhaps)
+            ERROR_CONTROLPADS
         }
     }
 
@@ -75,40 +76,60 @@ pub extern "C" fn get_client_handles(client_handles: *mut c_string_vec) -> CErro
             SUCCESS
         }
         Err(_) => { // TODO: use error
-            FAILURE
+            ERROR_CONTROLPADS
         }
     }
-
-}
-/*
-/// Send an atomic message to the specified control pad client
-pub fn send_message(client: &ClientHandle, msg: &str) -> Result<()> {
-    let ipc_name = client.to_string() + "_out";
-    println!("sent {}", msg);
-    let delin_msg = msg.to_string() + str::from_utf8(&[0])?;
-    ipc::write(&ipc_name, &delin_msg)
-	.unwrap_or_else(|e| panic!("Failed to write: {}", e));
-    Ok(())
 }
 
-/// Returns a vector of all messages that have been received from the
-/// specified control pad client since the last call to this function for that
-/// client
-pub fn get_messages(client: &ClientHandle) -> Result<Vec<String>> {
-    let mut ret: Vec<String> = Vec::new();
-    let ipc_name = client.to_string() + "_in";
-    let msgs_string = ipc::consume(&ipc_name)
-	.unwrap_or_else(|e| panic!("Failed to consume: {}", e));
-    if msgs_string.len() == 0 {
-	return Ok(vec![]);
+#[no_mangle]
+pub extern "C" fn send_message(client: *const c_char, msg: *const c_char) -> CError {
+    // TODO: We're copying data to make the String and eventually we should
+    //       *not* do that
+    // TODO: print along with errors
+    unsafe {
+        let client_str = match CStr::from_ptr(client).to_str() {
+            Ok(ok) => ok,
+            Err(_) => {
+                return ERROR_CSTR_TO_STR;
+            }
+        };
+        let msg_str = match CStr::from_ptr(msg).to_str() {
+            Ok(ok) => ok,
+            Err(_) => {
+                return ERROR_CSTR_TO_STR;
+            }
+        };
+
+        match controlpads::send_message(&String::from(client_str), msg_str) {
+            Ok(()) => {
+                SUCCESS
+            }
+            Err(_) => {
+                ERROR_CONTROLPADS
+            }
+            
+        }
     }
-    println!("{}", msgs_string.replace(str::from_utf8(&[0])?, "0"));
-    let mut parts = msgs_string.split(str::from_utf8(&[0])?).collect::<Vec<&str>>();
-    parts.pop(); // there will be nothing after last null byte
-    for p in &parts {
-	//println!("got {}", p);
-	ret.push(String::from(*p));
-    }
-    Ok(ret)
 }
-*/
+
+#[no_mangle]
+pub extern "C" fn get_messages(client: *const c_char, messages: *mut c_string_vec) -> CError {
+    unsafe {
+        let client_str = match CStr::from_ptr(client).to_str() {
+            Ok(ok) => ok,
+            Err(_) => {
+                return ERROR_CSTR_TO_STR;
+            }
+        };
+        let result = controlpads::get_messages(&String::from(client_str));
+        match result {
+            Ok(x) => {
+                *messages = rust_to_c_strvec(x);
+                SUCCESS
+            }
+            Err(_) => {
+                ERROR_CONTROLPADS
+            }
+        }
+    }
+}
