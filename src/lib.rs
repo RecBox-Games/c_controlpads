@@ -58,7 +58,8 @@ pub extern "C" fn clients_changed(did_change: &mut bool) -> CError {
             *did_change = x;
             SUCCESS
         }
-        Err(_) => { // TODO: use error (print it to stderr perhaps)
+        Err(e) => { // TODO: use error (print it to stderr perhaps)
+            println!("clients_changed() Error: {}", e);
             ERROR_CONTROLPADS
         }
     }
@@ -75,7 +76,8 @@ pub extern "C" fn get_client_handles(client_handles: *mut c_string_vec) -> CErro
             }
             SUCCESS
         }
-        Err(_) => { // TODO: use error
+        Err(e) => { // TODO: use error
+            println!("get_client_handles() Error: {}", e);
             ERROR_CONTROLPADS
         }
     }
@@ -89,13 +91,15 @@ pub extern "C" fn send_message(client: *const c_char, msg: *const c_char) -> CEr
     unsafe {
         let client_str = match CStr::from_ptr(client).to_str() {
             Ok(ok) => ok,
-            Err(_) => {
+            Err(e) => {
+                println!("send_message() client_str Error: {}", e);
                 return ERROR_CSTR_TO_STR;
             }
         };
         let msg_str = match CStr::from_ptr(msg).to_str() {
             Ok(ok) => ok,
-            Err(_) => {
+            Err(e) => {
+                println!("send_message() msg_str Error: {}", e);
                 return ERROR_CSTR_TO_STR;
             }
         };
@@ -104,7 +108,8 @@ pub extern "C" fn send_message(client: *const c_char, msg: *const c_char) -> CEr
             Ok(()) => {
                 SUCCESS
             }
-            Err(_) => {
+            Err(e) => {
+                println!("send_message() Error: {}", e);
                 ERROR_CONTROLPADS
             }
             
@@ -117,7 +122,8 @@ pub extern "C" fn get_messages(client: *const c_char, messages: *mut c_string_ve
     unsafe {
         let client_str = match CStr::from_ptr(client).to_str() {
             Ok(ok) => ok,
-            Err(_) => {
+            Err(e) => {
+                println!("get_messages() client_str Error: {}", e);
                 return ERROR_CSTR_TO_STR;
             }
         };
@@ -127,7 +133,8 @@ pub extern "C" fn get_messages(client: *const c_char, messages: *mut c_string_ve
                 *messages = rust_to_c_strvec(x);
                 SUCCESS
             }
-            Err(_) => {
+            Err(e) => {
+                println!("get_messages() Error: {}", e);
                 ERROR_CONTROLPADS
             }
         }
