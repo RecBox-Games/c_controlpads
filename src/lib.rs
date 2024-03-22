@@ -2,8 +2,6 @@
 use std::os::raw::c_char;
 use std::ffi::{CStr, CString};
 
-use controlpads;
-
 #[repr(C)]
 pub struct c_string_vec {
     ptr: *mut *mut c_char,
