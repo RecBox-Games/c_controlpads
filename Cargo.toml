@@ -9,6 +9,6 @@ edition = "2021"
 controlpad_server = { path = "../ControlpadServer" }
 
 [lib]
-#crate-type = ["staticlib"]
+crate-type = ["staticlib"]
 #crate-type = ["dylib"]
-crate-type = ["cdylib"]
+#crate-type = ["cdylib"]
