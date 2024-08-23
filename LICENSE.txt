@@ -1,0 +1,2 @@
+License
+This project is licensed under the terms of the GNU General Public License v3.0. See the LICENSE file for details. For dependencies that offer multiple licensing options (e.g., "Apache 2.0 OR BSL-1.0"), this project uses the Apache 2.0 license to ensure compatibility with GPLv3, or if Apache 2.0 is not an option this project uses the first listed license which is compatible with GPLv3.
