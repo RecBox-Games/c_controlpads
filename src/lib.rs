@@ -1,6 +1,6 @@
 // Copyright 2022-2024 RecBox, Inc.
 //
-// This file is part of the rqn repository.
+// This file is part of the c_controlpads repository.
 //
 // c_controlpads is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by the 
