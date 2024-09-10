@@ -1,3 +1,12 @@
+// The code in this file (test.c) is licensed under CC0 1.0 Universal (CC0 1.0)
+// Public Domain Dedication.
+// To view a copy of this license, visit
+// http://creativecommons.org/publicdomain/zero/1.0/
+//
+// You can copy, modify, distribute and perform the work, even for commercial
+// purposes, all without asking permission. See the CC0 Public Domain
+// Dedication for more details.
+
 #include <stdio.h>
 #include <stdint.h>
 #include <unistd.h>
